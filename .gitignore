@@ -9,9 +9,11 @@ dist
 # Node dependencies
 node_modules
 
-# Logs
+# Logs & Backups
 logs
 *.log
+*.bak
+*.bak/
 
 # Misc
 .DS_Store

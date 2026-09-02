@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import rw03GeoJson from '~/data/rw03.json'
-import cctvGeoJson from '~/data/cctv.json'
-import pengurusGeoJson from '~/data/pengurus.json'
+const { data: spatialData } = await useRw3SpatialData()
 
-const totalRt = computed(() => rw03GeoJson.features.length)
-const totalCctv = computed(() => cctvGeoJson.features.length)
-const totalPengurus = computed(() => pengurusGeoJson.features.length)
+const totalRt = computed(() => spatialData.value?.wilayah?.features?.length || 0)
+const totalCctv = computed(() => spatialData.value?.cctv?.features?.length || 0)
+const totalPengurus = computed(() => spatialData.value?.pengurus?.features?.length || 0)
 </script>
 
 <template>
@@ -104,7 +102,7 @@ const totalPengurus = computed(() => pengurusGeoJson.features.length)
             </div>
             <h3 class="card-title text-lg font-bold">Titik Pantau CCTV</h3>
             <p class="text-xs sm:text-sm text-base-content/70 leading-relaxed">
-              Informasi titik sebaran kamera pengawas di akses gerbang masuk, pos ronda, dan area publik warga lengkap dengan status online/maintenance.
+              Informasi titik sebaran kamera pengawas di akses gerbang masuk, pos ronda, dan area publik lingkungan warga RW 03.
             </p>
           </div>
         </div>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import rw03GeoJson from '~/data/rw03.json'
-import cctvGeoJson from '~/data/cctv.json'
-import pengurusGeoJson from '~/data/pengurus.json'
+
+const { data: spatialData, pending, error } = await useRw3SpatialData()
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 let mapInstance: any = null
@@ -40,9 +39,9 @@ const rtColors: Record<string, string> = {
 }
 
 // Data Lists
-const wilayahList = computed(() => rw03GeoJson.features)
-const cctvList = computed(() => cctvGeoJson.features)
-const pengurusList = computed(() => pengurusGeoJson.features)
+const wilayahList = computed(() => spatialData.value?.wilayah?.features || [])
+const cctvList = computed(() => spatialData.value?.cctv?.features || [])
+const pengurusList = computed(() => spatialData.value?.pengurus?.features || [])
 
 // Combined & Filtered Items for Sidebar
 const filteredItems = computed(() => {
@@ -78,9 +77,9 @@ const filteredItems = computed(() => {
         id: c.properties.id,
         category: 'cctv',
         title: c.properties.name,
-        subtitle: `RT ${c.properties.rt} • ${c.properties.resolution}`,
-        badge: c.properties.status === 'online' ? 'Online' : 'Maintenance',
-        badgeClass: c.properties.status === 'online' ? 'badge-success' : 'badge-warning',
+        subtitle: c.properties.rt ? `RT ${c.properties.rt} • Titik CCTV` : 'Titik Pantau CCTV',
+        badge: 'CCTV',
+        badgeClass: 'badge-info',
         data: c
       })
     })
@@ -206,7 +205,7 @@ const initWilayahLayer = (L: any) => {
     }
   }
 
-  geoJsonPolygonLayer = L.geoJSON(rw03GeoJson as any, {
+  geoJsonPolygonLayer = L.geoJSON((spatialData.value?.wilayah || { type: 'FeatureCollection', features: [] }) as any, {
     style: getStyle,
     onEachFeature: (feature: any, layer: any) => {
       const props = feature.properties || {}
@@ -268,7 +267,6 @@ const initLokasiLayers = (L: any) => {
     const coords = [feat.geometry.coordinates[1], feat.geometry.coordinates[0]]
 
     // Custom CCTV Icon
-    const isOnline = props.status === 'online'
     const cctvIcon = L.divIcon({
       className: 'custom-map-icon',
       html: `
@@ -278,10 +276,6 @@ const initLokasiLayers = (L: any) => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
           </div>
-          <span class="absolute -top-1 -right-1 flex h-3 w-3">
-            ${isOnline ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>' : ''}
-            <span class="relative inline-flex rounded-full h-3 w-3 ${isOnline ? 'bg-emerald-500' : 'bg-amber-500'} ring-1 ring-white"></span>
-          </span>
         </div>
       `,
       iconSize: [32, 32],
@@ -294,13 +288,13 @@ const initLokasiLayers = (L: any) => {
       <div class="p-3.5 min-w-[240px]">
         <div class="flex items-center justify-between gap-2 border-b border-base-200 pb-2 mb-2 pr-5">
           <div class="flex items-center gap-1.5">
-            </span>
+            <span class="badge badge-info badge-sm font-bold">CCTV</span>
             <span class="text-xs font-bold text-base-content">${props.name}</span>
           </div>
         </div>
         <p class="text-xs text-base-content/80 mb-2">${props.description || 'Kamera CCTV Wilayah RW 03'}</p>
         <div class="mt-2.5 pt-2 border-t border-base-200 flex justify-end">
-          <button class="btn btn-xs btn-primary gap-1 w-full" onclick="alert('Streaming simulasi CCTV RT ${props.rt}')">
+          <button class="btn btn-xs btn-primary gap-1 w-full" onclick="alert('Streaming simulasi ${props.name}')">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
