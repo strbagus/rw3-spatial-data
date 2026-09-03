@@ -18,6 +18,14 @@ const showDisclaimerAlert = ref(true)
 const activeTab = ref<'all' | 'wilayah' | 'cctv' | 'pengurus'>('all')
 const searchQuery = ref('')
 const selectedItemId = ref<string | null>(null)
+const selectedCctvForLive = ref<any>(null)
+
+const openCctvLiveById = (id: string) => {
+  const found = cctvList.value.find((c: any) => c.properties.id === id)
+  if (found) {
+    selectedCctvForLive.value = found.properties
+  }
+}
 
 // Layer Visibility Toggles
 const layerVisibility = ref({
@@ -294,7 +302,7 @@ const initLokasiLayers = (L: any) => {
         </div>
         <p class="text-xs text-base-content/80 mb-2">${props.description || 'Kamera CCTV Wilayah RW 03'}</p>
         <div class="mt-2.5 pt-2 border-t border-base-200 flex justify-end">
-          <button class="btn btn-xs btn-primary gap-1 w-full" onclick="alert('Streaming simulasi ${props.name}')">
+          <button class="btn btn-xs btn-primary gap-1 w-full" onclick="window.__openCctvLive && window.__openCctvLive('${props.id}')">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -509,6 +517,10 @@ const resetAllView = () => {
 let alertTimeout: any = null
 
 onMounted(() => {
+  if (typeof window !== 'undefined') {
+    ;(window as any).__openCctvLive = openCctvLiveById
+  }
+
   // Auto-dismiss dummy data alert after 8 seconds
   alertTimeout = setTimeout(() => {
     showDisclaimerAlert.value = false
@@ -516,6 +528,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    delete (window as any).__openCctvLive
+  }
   if (alertTimeout) {
     clearTimeout(alertTimeout)
     alertTimeout = null
@@ -726,6 +741,17 @@ onUnmounted(() => {
               <span class="badge badge-xs" :class="item.badgeClass">
                 {{ item.badge }}
               </span>
+              <button 
+                v-if="item.category === 'cctv'"
+                class="btn btn-xs btn-circle btn-info text-white" 
+                title="Live Streaming CCTV"
+                @click.stop="selectedCctvForLive = item.data.properties"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
               <button class="btn btn-xs btn-ghost btn-circle opacity-60 group-hover:opacity-100" title="Fokus di Peta">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
@@ -772,6 +798,12 @@ onUnmounted(() => {
 
     <!-- Full Map Canvas Element -->
     <div ref="mapContainer" class="w-full h-full z-0"></div>
+
+    <!-- CCTV Live Streaming Modal -->
+    <CctvLiveModal 
+      :cctv="selectedCctvForLive" 
+      @close="selectedCctvForLive = null" 
+    />
   </div>
 </template>
 
