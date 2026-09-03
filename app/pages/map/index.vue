@@ -27,6 +27,29 @@ const openCctvLiveById = (id: string) => {
   }
 }
 
+// Layer Settings (Configured via layers.json)
+const enabledLayers = computed(() => spatialData.value?.layers || { wilayah: true, cctv: true, pengurus: true })
+const enabledCount = computed(() => Object.values(enabledLayers.value).filter(Boolean).length)
+
+// Automatically reset active tab if current tab becomes disabled
+watch(
+  enabledLayers,
+  (val) => {
+    if (activeTab.value !== 'all' && !val[activeTab.value]) {
+      activeTab.value = 'all'
+    }
+  },
+  { deep: true }
+)
+
+const activeCategorySubtitle = computed(() => {
+  const names: string[] = []
+  if (enabledLayers.value.wilayah) names.push('Wilayah')
+  if (enabledLayers.value.cctv) names.push('CCTV')
+  if (enabledLayers.value.pengurus) names.push('Pengurus')
+  return names.length > 0 ? `Kategori Aktif: ${names.join(' • ')}` : 'Peta Spasial RW 03'
+})
+
 // Layer Visibility Toggles
 const layerVisibility = ref({
   wilayah: true,
@@ -64,7 +87,7 @@ const filteredItems = computed(() => {
     data: any
   }> = []
 
-  if (activeTab.value === 'all' || activeTab.value === 'wilayah') {
+  if (enabledLayers.value.wilayah && (activeTab.value === 'all' || activeTab.value === 'wilayah')) {
     wilayahList.value.forEach((w) => {
       const rt = w.properties.rt
       list.push({
@@ -79,7 +102,7 @@ const filteredItems = computed(() => {
     })
   }
 
-  if (activeTab.value === 'all' || activeTab.value === 'cctv') {
+  if (enabledLayers.value.cctv && (activeTab.value === 'all' || activeTab.value === 'cctv')) {
     cctvList.value.forEach((c) => {
       list.push({
         id: c.properties.id,
@@ -93,7 +116,7 @@ const filteredItems = computed(() => {
     })
   }
 
-  if (activeTab.value === 'all' || activeTab.value === 'pengurus') {
+  if (enabledLayers.value.pengurus && (activeTab.value === 'all' || activeTab.value === 'pengurus')) {
     pengurusList.value.forEach((p) => {
       const isRW = p.properties.jabatan === 'RW'
       list.push({
@@ -173,10 +196,14 @@ onMounted(async () => {
     .addTo(mapInstance)
 
   // 1. Initialize Wilayah (GeoJSON Polygons)
-  initWilayahLayer(L)
+  if (enabledLayers.value.wilayah) {
+    initWilayahLayer(L)
+  }
 
   // 2. Initialize Lokasi Groups (CCTV & Pengurus)
-  initLokasiLayers(L)
+  if (enabledLayers.value.cctv || enabledLayers.value.pengurus) {
+    initLokasiLayers(L)
+  }
 
   // Fit bounds and lock zoom/pan bounds
   if (geoJsonPolygonLayer && geoJsonPolygonLayer.getLayers().length > 0) {
@@ -269,129 +296,133 @@ const initWilayahLayer = (L: any) => {
 // Initialize Lokasi Layers (CCTV & Pengurus)
 const initLokasiLayers = (L: any) => {
   // CCTV Group
-  cctvLayerGroup = L.layerGroup()
-  cctvList.value.forEach((feat: any) => {
-    const props = feat.properties
-    const coords = [feat.geometry.coordinates[1], feat.geometry.coordinates[0]]
+  if (enabledLayers.value.cctv) {
+    cctvLayerGroup = L.layerGroup()
+    cctvList.value.forEach((feat: any) => {
+      const props = feat.properties
+      const coords = [feat.geometry.coordinates[1], feat.geometry.coordinates[0]]
 
-    // Custom CCTV Icon
-    const cctvIcon = L.divIcon({
-      className: 'custom-map-icon',
-      html: `
-        <div class="relative group cursor-pointer">
-          <div class="w-8 h-8 rounded-full bg-cyan-600 text-white flex items-center justify-center shadow-lg border-2 border-white transition-transform hover:scale-110">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
+      // Custom CCTV Icon
+      const cctvIcon = L.divIcon({
+        className: 'custom-map-icon',
+        html: `
+          <div class="relative group cursor-pointer">
+            <div class="w-8 h-8 rounded-full bg-cyan-600 text-white flex items-center justify-center shadow-lg border-2 border-white transition-transform hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -18]
+      })
+
+      const marker = L.marker(coords, { icon: cctvIcon })
+      marker.bindPopup(`
+        <div class="p-3.5 min-w-[240px]">
+          <div class="flex items-center justify-between gap-2 border-b border-base-200 pb-2 mb-2 pr-5">
+            <div class="flex items-center gap-1.5">
+              <span class="badge badge-info badge-sm font-bold">CCTV</span>
+              <span class="text-xs font-bold text-base-content">${props.name}</span>
+            </div>
+          </div>
+          <p class="text-xs text-base-content/80 mb-2">${props.description || 'Kamera CCTV Wilayah RW 03'}</p>
+          <div class="mt-2.5 pt-2 border-t border-base-200 flex justify-end">
+            <button class="btn btn-xs btn-primary gap-1 w-full" onclick="window.__openCctvLive && window.__openCctvLive('${props.id}')">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Live Preview
+            </button>
           </div>
         </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-      popupAnchor: [0, -18]
+      `)
+
+      marker.featureId = props.id
+      cctvLayerGroup.addLayer(marker)
     })
 
-    const marker = L.marker(coords, { icon: cctvIcon })
-    marker.bindPopup(`
-      <div class="p-3.5 min-w-[240px]">
-        <div class="flex items-center justify-between gap-2 border-b border-base-200 pb-2 mb-2 pr-5">
-          <div class="flex items-center gap-1.5">
-            <span class="badge badge-info badge-sm font-bold">CCTV</span>
-            <span class="text-xs font-bold text-base-content">${props.name}</span>
-          </div>
-        </div>
-        <p class="text-xs text-base-content/80 mb-2">${props.description || 'Kamera CCTV Wilayah RW 03'}</p>
-        <div class="mt-2.5 pt-2 border-t border-base-200 flex justify-end">
-          <button class="btn btn-xs btn-primary gap-1 w-full" onclick="window.__openCctvLive && window.__openCctvLive('${props.id}')">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Live Preview
-          </button>
-        </div>
-      </div>
-    `)
-
-    marker.featureId = props.id
-    cctvLayerGroup.addLayer(marker)
-  })
-
-  if (layerVisibility.value.cctv) {
-    cctvLayerGroup.addTo(mapInstance)
+    if (layerVisibility.value.cctv) {
+      cctvLayerGroup.addTo(mapInstance)
+    }
   }
 
   // Pengurus Group
-  pengurusLayerGroup = L.layerGroup()
-  pengurusList.value.forEach((feat: any) => {
-    const props = feat.properties
-    const coords = [feat.geometry.coordinates[1], feat.geometry.coordinates[0]]
-    const isRW = props.jabatan === 'RW'
+  if (enabledLayers.value.pengurus) {
+    pengurusLayerGroup = L.layerGroup()
+    pengurusList.value.forEach((feat: any) => {
+      const props = feat.properties
+      const coords = [feat.geometry.coordinates[1], feat.geometry.coordinates[0]]
+      const isRW = props.jabatan === 'RW'
 
-    // Custom Pengurus Icon
-    const pengurusIcon = L.divIcon({
-      className: 'custom-map-icon',
-      html: `
-        <div class="relative group cursor-pointer">
-          <div class="w-8 h-8 rounded-full ${isRW ? 'bg-indigo-600' : 'bg-indigo-500'} text-white flex items-center justify-center shadow-lg border-2 border-white transition-transform hover:scale-110">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+      // Custom Pengurus Icon
+      const pengurusIcon = L.divIcon({
+        className: 'custom-map-icon',
+        html: `
+          <div class="relative group cursor-pointer">
+            <div class="w-8 h-8 rounded-full ${isRW ? 'bg-indigo-600' : 'bg-indigo-500'} text-white flex items-center justify-center shadow-lg border-2 border-white transition-transform hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            ${
+              isRW
+                ? `<span class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-white ring-1 ring-white" title="Ketua RW">
+                     ★
+                   </span>`
+                : ''
+            }
           </div>
-          ${
-            isRW
-              ? `<span class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-white ring-1 ring-white" title="Ketua RW">
-                   ★
-                 </span>`
-              : ''
-          }
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -18]
+      })
+
+      const marker = L.marker(coords, { icon: pengurusIcon })
+      marker.bindPopup(`
+        <div class="p-3.5 min-w-[240px]">
+          <div class="flex items-center justify-between gap-2 border-b border-base-200 pb-2 mb-2 pr-5">
+            <span class="badge ${isRW ? 'badge-primary' : 'badge-secondary'} badge-sm font-bold">${props.jabatan === 'RW' || props.jabatan === 'RT' ? `Ketua ${props.jabatan}` : props.jabatan}</span>
+            <span class="text-xs font-semibold text-base-content/60">RW ${props.rw}</span>
+          </div>
+          <h4 class="font-bold text-sm text-base-content">${props.name}</h4>
+          <p class="text-xs text-base-content/70 mt-0.5">${props.address}</p>
+          <div class="mt-2 space-y-1 text-[11px] bg-base-200/60 p-2 rounded-lg border border-base-200">
+            <div class="flex justify-between">
+              <span class="text-base-content/60">Wilayah:</span>
+              <span class="font-semibold text-base-content">RT ${props.rt} / RW ${props.rw}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-base-content/60">Periode:</span>
+              <span class="text-base-content/80">${props.periode || '2024 - 2029'}</span>
+            </div>
+          </div>
+          <div class="mt-2.5 pt-2 border-t border-base-200 flex gap-2">
+            <a 
+              href="https://wa.me/${props.phone?.replace(/[^0-9]/g, '')}" 
+              target="_blank"
+              class="btn btn-xs btn-success text-white w-full gap-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+              </svg>
+              Hubungi WhatsApp
+            </a>
+          </div>
         </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-      popupAnchor: [0, -18]
+      `)
+
+      marker.featureId = props.id
+      pengurusLayerGroup.addLayer(marker)
     })
 
-    const marker = L.marker(coords, { icon: pengurusIcon })
-    marker.bindPopup(`
-      <div class="p-3.5 min-w-[240px]">
-        <div class="flex items-center justify-between gap-2 border-b border-base-200 pb-2 mb-2 pr-5">
-          <span class="badge ${isRW ? 'badge-primary' : 'badge-secondary'} badge-sm font-bold">${props.jabatan === 'RW' || props.jabatan === 'RT' ? `Ketua ${props.jabatan}` : props.jabatan}</span>
-          <span class="text-xs font-semibold text-base-content/60">RW ${props.rw}</span>
-        </div>
-        <h4 class="font-bold text-sm text-base-content">${props.name}</h4>
-        <p class="text-xs text-base-content/70 mt-0.5">${props.address}</p>
-        <div class="mt-2 space-y-1 text-[11px] bg-base-200/60 p-2 rounded-lg border border-base-200">
-          <div class="flex justify-between">
-            <span class="text-base-content/60">Wilayah:</span>
-            <span class="font-semibold text-base-content">RT ${props.rt} / RW ${props.rw}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-base-content/60">Periode:</span>
-            <span class="text-base-content/80">${props.periode || '2024 - 2029'}</span>
-          </div>
-        </div>
-        <div class="mt-2.5 pt-2 border-t border-base-200 flex gap-2">
-          <a 
-            href="https://wa.me/${props.phone?.replace(/[^0-9]/g, '')}" 
-            target="_blank"
-            class="btn btn-xs btn-success text-white w-full gap-1"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
-              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
-            </svg>
-            Hubungi WhatsApp
-          </a>
-        </div>
-      </div>
-    `)
-
-    marker.featureId = props.id
-    pengurusLayerGroup.addLayer(marker)
-  })
-
-  if (layerVisibility.value.pengurus) {
-    pengurusLayerGroup.addTo(mapInstance)
+    if (layerVisibility.value.pengurus) {
+      pengurusLayerGroup.addTo(mapInstance)
+    }
   }
 }
 
@@ -556,7 +587,7 @@ onUnmounted(() => {
           </NuxtLink>
           <div class="min-w-0">
             <h1 class="font-bold text-xs sm:text-base leading-tight truncate">Peta Digital RW 03</h1>
-            <p class="text-[11px] text-base-content/70 hidden sm:block truncate">Kategori: Wilayah & Lokasi (CCTV, Pengurus)</p>
+            <p class="text-[11px] text-base-content/70 hidden sm:block truncate">{{ activeCategorySubtitle }}</p>
           </div>
         </div>
       </div>
@@ -605,11 +636,18 @@ onUnmounted(() => {
         </div>
 
         <!-- Layer Toggle Switches -->
-        <div class="p-2.5 sm:p-3 border-b border-base-200 space-y-1.5 sm:space-y-2 bg-base-100">
+        <div v-if="enabledCount > 0" class="p-2.5 sm:p-3 border-b border-base-200 space-y-1.5 sm:space-y-2 bg-base-100">
           <div class="text-[11px] sm:text-xs font-semibold text-base-content/70">Tampilkan Kategori Layer:</div>
-          <div class="grid grid-cols-3 gap-1.5">
+          <div 
+            class="grid gap-1.5"
+            :class="{
+              'grid-cols-3': enabledCount >= 3,
+              'grid-cols-2': enabledCount === 2,
+              'grid-cols-1': enabledCount === 1
+            }"
+          >
             <!-- Wilayah Toggle -->
-            <label class="cursor-pointer label p-1.5 sm:p-2 rounded-lg bg-base-200/60 border border-base-200 flex flex-col items-center gap-1 hover:bg-base-200 transition">
+            <label v-if="enabledLayers.wilayah" class="cursor-pointer label p-1.5 sm:p-2 rounded-lg bg-base-200/60 border border-base-200 flex flex-col items-center gap-1 hover:bg-base-200 transition">
               <div class="flex items-center gap-1">
                 <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-500"></span>
                 <span class="text-[10px] sm:text-[11px] font-bold">Wilayah</span>
@@ -618,7 +656,7 @@ onUnmounted(() => {
             </label>
 
             <!-- CCTV Toggle -->
-            <label class="cursor-pointer label p-1.5 sm:p-2 rounded-lg bg-base-200/60 border border-base-200 flex flex-col items-center gap-1 hover:bg-base-200 transition">
+            <label v-if="enabledLayers.cctv" class="cursor-pointer label p-1.5 sm:p-2 rounded-lg bg-base-200/60 border border-base-200 flex flex-col items-center gap-1 hover:bg-base-200 transition">
               <div class="flex items-center gap-1">
                 <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-cyan-500"></span>
                 <span class="text-[10px] sm:text-[11px] font-bold">CCTV</span>
@@ -627,7 +665,7 @@ onUnmounted(() => {
             </label>
 
             <!-- Pengurus Toggle -->
-            <label class="cursor-pointer label p-1.5 sm:p-2 rounded-lg bg-base-200/60 border border-base-200 flex flex-col items-center gap-1 hover:bg-base-200 transition">
+            <label v-if="enabledLayers.pengurus" class="cursor-pointer label p-1.5 sm:p-2 rounded-lg bg-base-200/60 border border-base-200 flex flex-col items-center gap-1 hover:bg-base-200 transition">
               <div class="flex items-center gap-1">
                 <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-indigo-500"></span>
                 <span class="text-[10px] sm:text-[11px] font-bold">Pengurus</span>
@@ -657,7 +695,15 @@ onUnmounted(() => {
         </div>
 
         <!-- Category Tabs -->
-        <div class="tabs tabs-bordered grid grid-cols-4 text-[11px] sm:text-xs font-semibold px-2 bg-base-200/30">
+        <div 
+          v-if="enabledCount > 1"
+          class="tabs tabs-bordered grid text-[11px] sm:text-xs font-semibold px-2 bg-base-200/30"
+          :class="{
+            'grid-cols-4': enabledCount >= 3,
+            'grid-cols-3': enabledCount === 2,
+            'grid-cols-2': enabledCount === 1
+          }"
+        >
           <button 
             class="tab tab-xs sm:tab-sm py-2 sm:py-3 h-auto" 
             :class="{ 'tab-active font-bold text-primary': activeTab === 'all' }"
@@ -666,6 +712,7 @@ onUnmounted(() => {
             Semua
           </button>
           <button 
+            v-if="enabledLayers.wilayah"
             class="tab tab-xs sm:tab-sm py-2 sm:py-3 h-auto" 
             :class="{ 'tab-active font-bold text-primary': activeTab === 'wilayah' }"
             @click="activeTab = 'wilayah'"
@@ -673,6 +720,7 @@ onUnmounted(() => {
             Wilayah
           </button>
           <button 
+            v-if="enabledLayers.cctv"
             class="tab tab-xs sm:tab-sm py-2 sm:py-3 h-auto" 
             :class="{ 'tab-active font-bold text-primary': activeTab === 'cctv' }"
             @click="activeTab = 'cctv'"
@@ -680,6 +728,7 @@ onUnmounted(() => {
             CCTV
           </button>
           <button 
+            v-if="enabledLayers.pengurus"
             class="tab tab-xs sm:tab-sm py-2 sm:py-3 h-auto" 
             :class="{ 'tab-active font-bold text-primary': activeTab === 'pengurus' }"
             @click="activeTab = 'pengurus'"

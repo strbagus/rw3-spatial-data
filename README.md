@@ -21,8 +21,11 @@ Aplikasi Geographic Information System (GIS) dan pemetaan wilayah interaktif unt
   - Mode *Fullscreen* dan tombol *Reload stream*.
   - Manajemen proses cerdas: FFmpeg otomatis berhenti saat modal streaming ditutup untuk menghemat resource CPU.
 - 🔍 **Pencarian & Manajemen Layer Cepat**:
-  - Drawer navigasi untuk memfilter layer (Wilayah, CCTV, Pengurus).
+  - Drawer navigasi untuk memfilter layer aktif (Wilayah, CCTV, Pengurus).
   - Kolom pencarian instan nama RT, kamera, atau pengurus.
+- 🎛️ **Visibilitas Layer Terkendali (JSON)**:
+  - Aktifkan / sembunyikan seluruh kategori layer secara dinamis melalui file [`public/layers.json`](public/layers.json) (`"wilayah"`, `"cctv"`, `"pengurus"`: `true` / `false`).
+  - Layer yang disetel `false` akan **disembunyikan sepenuhnya** dari peta, switch selector, tab kategori, dan beranda tanpa perlu rebuild aplikasi.
 
 ---
 
