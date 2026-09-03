@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rw3-gis-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - CCTV_NVR_HOST=${CCTV_NVR_HOST:-192.168.1.14}
+      - CCTV_NVR_PORT=${CCTV_NVR_PORT:-554}
+      - CCTV_NVR_USER=${CCTV_NVR_USER:-admin}
+      - CCTV_NVR_PASSWORD=${CCTV_NVR_PASSWORD:-}
+      - CCTV_RTSP_PATTERN=${CCTV_RTSP_PATTERN:-/avstream/channel={channel}/stream={stream}.sdp}
+    # If the NVR is only accessible on the host's direct network interface,
+    # you can alternatively uncomment network_mode: host
+    # network_mode: host
