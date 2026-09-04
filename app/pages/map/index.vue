@@ -14,7 +14,6 @@ let pengurusLayerGroup: any = null
 
 // UI State
 const showSidebar = ref(false)
-const showDisclaimerAlert = ref(true)
 const activeTab = ref<'all' | 'wilayah' | 'cctv' | 'pengurus'>('all')
 const searchQuery = ref('')
 const selectedItemId = ref<string | null>(null)
@@ -545,26 +544,16 @@ const resetAllView = () => {
   }
 }
 
-let alertTimeout: any = null
 
 onMounted(() => {
   if (typeof window !== 'undefined') {
     ;(window as any).__openCctvLive = openCctvLiveById
   }
-
-  // Auto-dismiss dummy data alert after 8 seconds
-  alertTimeout = setTimeout(() => {
-    showDisclaimerAlert.value = false
-  }, 8000)
 })
 
 onUnmounted(() => {
   if (typeof window !== 'undefined') {
     delete (window as any).__openCctvLive
-  }
-  if (alertTimeout) {
-    clearTimeout(alertTimeout)
-    alertTimeout = null
   }
   if (mapInstance) {
     mapInstance.remove()
@@ -818,32 +807,6 @@ onUnmounted(() => {
       </aside>
     </transition>
 
-    <!-- Disclaimer / Dummy Data Notification Alert -->
-    <transition name="toast-fade">
-      <div 
-        v-if="showDisclaimerAlert" 
-        class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-[calc(100%-2rem)] max-w-md pointer-events-auto"
-      >
-        <div class="alert alert-warning shadow-2xl border border-warning/30 bg-warning/90 backdrop-blur-md text-warning-content py-2.5 px-3.5 flex items-center justify-between gap-2.5 rounded-xl">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div class="text-xs leading-tight font-medium">
-              <span class="font-bold block sm:inline">Pemberitahuan:</span>
-              Data pada peta ini merupakan data simulasi / dummy (tidak real).
-            </div>
-          </div>
-          <button 
-            @click="showDisclaimerAlert = false" 
-            class="btn btn-xs btn-circle btn-ghost shrink-0 hover:bg-black/10" 
-            title="Tutup Notifikasi"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-    </transition>
 
     <!-- Full Map Canvas Element -->
     <div ref="mapContainer" class="w-full h-full z-0"></div>
