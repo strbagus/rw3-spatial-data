@@ -7,6 +7,12 @@ useHead({
   title: 'Data Spasial & Peta Digital RW 03 Kampung Timuran'
 })
 
+const config = useRuntimeConfig()
+const appBase = computed(() => {
+  const b = config.app?.baseURL || '/'
+  return b.endsWith('/') ? b : `${b}/`
+})
+
 const mapContainer = ref<HTMLDivElement | null>(null)
 let mapInstance: any = null
 let LInstance: any = null
@@ -574,7 +580,7 @@ onUnmounted(() => {
       <div class="card bg-base-100/90 backdrop-blur-md shadow-xl pointer-events-auto border border-base-content/10 min-w-0 shrink">
         <div class="card-body p-2 sm:p-3 flex-row items-center gap-2 sm:gap-3 min-w-0">
           <div class="w-7 h-7 sm:w-8 sm:h-8 shrink-0 flex items-center justify-center">
-            <img src="/favicon.svg" class="w-6 h-6 sm:w-7 sm:h-7" alt="Logo RW 03">
+            <img :src="`${appBase}favicon.svg`" class="w-6 h-6 sm:w-7 sm:h-7" alt="Logo RW 03">
           </div>
           <div class="min-w-0">
             <h1 class="font-bold text-xs sm:text-base leading-tight truncate">Peta Digital RW 03</h1>

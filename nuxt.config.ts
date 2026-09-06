@@ -3,6 +3,9 @@ import tailwindcss from '@tailwindcss/vite'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
+  app: {
+    baseURL: '/peta'
+  },
   runtimeConfig: {
     cctv: {
       nvrHost: process.env.CCTV_NVR_HOST || '192.168.1.14',
@@ -21,7 +24,7 @@ export default defineNuxtConfig({
     }
   },
   routeRules: {
-    '/map': { redirect: { to: '/', statusCode: 301 } }
+    '/map': { redirect: '/' }
   },
   css: [
     'leaflet/dist/leaflet.css',

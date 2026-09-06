@@ -29,10 +29,16 @@ const channelNumber = computed(() => {
   return match ? parseInt(match[0], 10) : 1
 })
 
+const config = useRuntimeConfig()
+const appBase = computed(() => {
+  const b = config.app?.baseURL || '/'
+  return b.endsWith('/') ? b : `${b}/`
+})
+
 // Active stream URL locked to sub-channel (stream=1) for bandwidth & CPU efficiency
 const streamUrl = computed(() => {
   if (!props.cctv) return ''
-  return `/api/cctv/stream?channel=${channelNumber.value}&stream=1&t=${streamKey.value}`
+  return `${appBase.value}api/cctv/stream?channel=${channelNumber.value}&stream=1&t=${streamKey.value}`
 })
 
 // Reset state when a new CCTV is opened
