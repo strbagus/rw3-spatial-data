@@ -20,6 +20,9 @@ export default defineNuxtConfig({
       }
     }
   },
+  routeRules: {
+    '/map': { redirect: { to: '/', statusCode: 301 } }
+  },
   css: [
     'leaflet/dist/leaflet.css',
     '~/assets/style.css'

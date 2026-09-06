@@ -53,7 +53,7 @@ Browser web modern tidak mendukung protokol `rtsp://` secara bawaan, serta NVR l
                                                                             ▼
                                                             ┌───────────────────────────────┐
                                                             │    Browser Klien / Warga      │
-                                                            │  (/map -> CctvLiveModal.vue)  │
+                                                            │  (/ -> CctvLiveModal.vue)     │
                                                             └───────────────────────────────┘
 ```
 
@@ -110,7 +110,7 @@ CCTV_NVR_PASSWORD=
 ```bash
 npm run dev
 ```
-Buka browser di: [http://localhost:3000/map](http://localhost:3000/map)
+Buka browser di: [http://localhost:3000](http://localhost:3000)
 
 ---
 
