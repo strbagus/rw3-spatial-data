@@ -4,7 +4,57 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 const { data: spatialData, pending, error } = await useRw3SpatialData()
 
 useHead({
-  title: 'Data Spasial & Peta Digital RW 03 Kampung Timuran'
+  title: 'Data Spasial & Peta Digital RW 03 Kampung Timuran',
+  meta: [
+    {
+      name: 'description',
+      content: 'Peta interaktif RW 03 Timuran menunjukan batas RW, Lokasi CCTV dan Live CCTV'
+    },
+    {
+      property: 'og:title',
+      content: 'Data Spasial RW 03 Timuran'
+    },
+    {
+      property: 'og:description',
+      content: 'Jelajahi batas wilayah RT, lokasi CCTV, dan siaran langsung kamera yang tersedia pada peta lingkungan interaktif.'
+    },
+    {
+      property: 'og:image',
+      content: '/og-image.png'
+    },
+    {
+      property: 'og:image:width',
+      content: '1200'
+    },
+    {
+      property: 'og:image:height',
+      content: '630'
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    },
+    {
+      property: 'og:url',
+      content: 'https://example.com/'
+    },
+    {
+      name: 'twitter:card',
+      content: 'summary_large_image'
+    },
+    {
+      name: 'twitter:title',
+      content: 'Data Spasial RW 03 Timuran'
+    },
+    {
+      name: 'twitter:description',
+      content: 'Jelajahi batas wilayah RT, lokasi CCTV, dan siaran langsung kamera yang tersedia pada peta lingkungan interaktif.'
+    },
+    {
+      name: 'twitter:image',
+      content: '/og-image.png'
+    }
+  ]
 })
 
 const config = useRuntimeConfig()
