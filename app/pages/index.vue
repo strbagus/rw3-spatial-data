@@ -79,6 +79,33 @@ const searchQuery = ref('')
 const selectedItemId = ref<string | null>(null)
 const selectedCctvForLive = ref<any>(null)
 
+// Welcome SEO Popup State
+const showWelcome = ref(true)
+const dontShowAgain = ref(false)
+const WELCOME_STORAGE_KEYS = [
+  'show_welcome_popup',
+  'show_welcome',
+  'welcome_popup',
+  'showWelcome',
+  'welcome'
+]
+
+const closeWelcome = () => {
+  if (typeof window !== 'undefined' && dontShowAgain.value) {
+    WELCOME_STORAGE_KEYS.forEach((key) => localStorage.setItem(key, 'false'))
+  }
+  showWelcome.value = false
+}
+
+const handleDontShowAgainChange = () => {
+  if (typeof window === 'undefined') return
+  if (dontShowAgain.value) {
+    WELCOME_STORAGE_KEYS.forEach((key) => localStorage.setItem(key, 'false'))
+  } else {
+    WELCOME_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key))
+  }
+}
+
 const openCctvLiveById = (id: string) => {
   const found = cctvList.value.find((c: any) => c.properties.id === id)
   if (found) {
@@ -605,15 +632,32 @@ const resetAllView = () => {
 }
 
 
+const handleWelcomeKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && showWelcome.value) {
+    closeWelcome()
+  }
+}
+
 onMounted(() => {
   if (typeof window !== 'undefined') {
     ;(window as any).__openCctvLive = openCctvLiveById
+    window.addEventListener('keydown', handleWelcomeKeyDown)
+
+    // Check if welcome popup was marked as do not show again (state 'false')
+    const isHidden = WELCOME_STORAGE_KEYS.some(
+      (key) => localStorage.getItem(key) === 'false'
+    )
+    if (isHidden) {
+      showWelcome.value = false
+      dontShowAgain.value = true
+    }
   }
 })
 
 onUnmounted(() => {
   if (typeof window !== 'undefined') {
     delete (window as any).__openCctvLive
+    window.removeEventListener('keydown', handleWelcomeKeyDown)
   }
   if (mapInstance) {
     mapInstance.remove()
@@ -633,7 +677,7 @@ onUnmounted(() => {
             <img :src="`${appBase}favicon.svg`" class="w-6 h-6 sm:w-7 sm:h-7" alt="Logo RW 03">
           </div>
           <div class="min-w-0">
-            <h1 class="font-bold text-xs sm:text-base leading-tight truncate">Peta Digital RW 03</h1>
+            <div class="font-bold text-xs sm:text-base leading-tight truncate">Peta Digital RW 03</div>
             <p class="text-[11px] text-base-content/70 hidden sm:block truncate">{{ activeCategorySubtitle }}</p>
           </div>
         </div>
@@ -641,6 +685,17 @@ onUnmounted(() => {
 
       <!-- Header Action Controls -->
       <div class="flex items-center gap-1.5 sm:gap-2 pointer-events-auto shrink-0">
+        <button 
+          class="btn btn-xs sm:btn-sm btn-outline bg-base-100/90 backdrop-blur border-base-content/20 shadow-lg gap-1.5 px-2.5 sm:px-3" 
+          @click="showWelcome = true" 
+          title="Informasi Peta & Bantuan"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="hidden sm:inline">Info</span>
+        </button>
+
         <button 
           class="btn btn-xs sm:btn-sm shadow-lg gap-1.5 sm:gap-2 px-2.5 sm:px-3"
           :class="showSidebar ? 'btn-primary' : 'btn-outline bg-base-100/90 backdrop-blur border-base-content/20'"
@@ -874,6 +929,85 @@ onUnmounted(() => {
       :cctv="selectedCctvForLive" 
       @close="selectedCctvForLive = null" 
     />
+
+    <!-- Welcome SEO Popup Modal -->
+    <transition name="modal-fade">
+      <div 
+        v-if="showWelcome" 
+        class="fixed inset-0 z-[1500] flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs"
+        @click.self="closeWelcome"
+      >
+        <div 
+          class="card bg-base-100 w-full max-w-lg shadow-2xl border border-base-content/10 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
+        >
+          <!-- Modal Header -->
+          <div class="p-3 sm:p-4 border-b border-base-200 flex items-center justify-between gap-3 bg-base-200/50">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span class="font-bold text-xs sm:text-sm text-base-content truncate">Informasi Wilayah</span>
+            </div>
+            <button 
+              class="btn btn-xs sm:btn-sm btn-ghost btn-circle shrink-0 hover:bg-base-content/10" 
+              @click="closeWelcome" 
+              title="Tutup (Esc)"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Main Semantic Content for SEO -->
+          <main class="p-4 sm:p-6 overflow-y-auto max-h-[60vh] space-y-4 text-base-content">
+            <div>
+              <h1 class="text-lg sm:text-xl font-bold text-base-content">Data Spasial RW 03 Timuran</h1>
+              <p class="text-xs sm:text-sm text-base-content/80 mt-1.5 leading-relaxed">
+                Peta Interaktif data spasial RW 03 Kampung Timuran Yogyakarta, menampilkan batas wilayah RT dan lokasi CCTV
+              </p>
+            </div>
+
+            <div class="pt-3 border-t border-base-200 space-y-3">
+              <div>
+                <h2 class="text-sm sm:text-base font-semibold text-base-content">Batas Wilayah RT</h2>
+                <p class="text-xs sm:text-sm text-base-content/70 mt-1 leading-relaxed">
+                  Menampilkan batas Wilayah dan Lokasi RT 01, RT 02 dan RT 03 Kampung Timuran.
+                </p>
+              </div>
+
+              <div>
+                <h2 class="text-sm sm:text-base font-semibold text-base-content">Live CCTV</h2>
+                <p class="text-xs sm:text-sm text-base-content/70 mt-1 leading-relaxed">
+                  Menampilkan lokasi CCTV dan menampilkannya secara langsung.
+                </p>
+              </div>
+            </div>
+          </main>
+
+          <!-- Modal Footer Actions -->
+          <div class="p-3 sm:p-4 bg-base-200/50 border-t border-base-200 flex items-center justify-between gap-3">
+            <label class="cursor-pointer label gap-2 p-0 select-none">
+              <input 
+                type="checkbox" 
+                v-model="dontShowAgain" 
+                @change="handleDontShowAgainChange"
+                class="checkbox checkbox-xs sm:checkbox-sm checkbox-primary" 
+              />
+              <span class="label-text text-xs sm:text-sm text-base-content/80 font-medium">
+                jangan tampilkan lagi
+              </span>
+            </label>
+            <button 
+              class="btn btn-xs sm:btn-sm btn-primary px-4 sm:px-5" 
+              @click="closeWelcome"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -969,6 +1103,16 @@ onUnmounted(() => {
     transform: translateX(20px);
     opacity: 0;
   }
+}
+
+/* Transition for modal fade */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
 }
 
 /* Transition for toast alert */
