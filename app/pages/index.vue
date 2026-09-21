@@ -20,7 +20,7 @@ useHead({
     },
     {
       property: 'og:image',
-      content: '/og-image.png'
+      content: 'https://rw03timuran.com/peta/og-image.png'
     },
     {
       property: 'og:image:width',
@@ -36,7 +36,7 @@ useHead({
     },
     {
       property: 'og:url',
-      content: 'https://example.com/'
+      content: 'https://rw03timuran.com/peta/'
     },
     {
       name: 'twitter:card',
@@ -52,7 +52,7 @@ useHead({
     },
     {
       name: 'twitter:image',
-      content: '/og-image.png'
+      content: 'https://rw03timuran.com/peta/og-image.png'
     }
   ]
 })
