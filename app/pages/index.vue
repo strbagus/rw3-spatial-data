@@ -972,7 +972,7 @@ onUnmounted(() => {
               <div>
                 <h2 class="text-sm sm:text-base font-semibold text-base-content">Batas Wilayah RT</h2>
                 <p class="text-xs sm:text-sm text-base-content/70 mt-1 leading-relaxed">
-                  Menampilkan batas Wilayah dan Lokasi RT 01, RT 02 dan RT 03 Kampung Timuran.
+                  Menampilkan batas Wilayah dan Lokasi RT 07, RT 08 dan RT 09 Kampung Timuran.
                 </p>
               </div>
 
