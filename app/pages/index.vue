@@ -54,6 +54,12 @@ useHead({
       name: 'twitter:image',
       content: 'https://rw03timuran.com/peta/og-image.jpg'
     }
+  ],
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://rw03timuran.com/peta'
+    }
   ]
 })
 
