@@ -11,11 +11,26 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
+      - NITRO_PORT=3000
+      - NITRO_HOST=0.0.0.0
+      - NUXT_PUBLIC_DATA_ENDPOINTS_LAYERS=${NUXT_PUBLIC_DATA_ENDPOINTS_LAYERS:-/json/layers.json}
+      - NUXT_PUBLIC_DATA_ENDPOINTS_WILAYAH=${NUXT_PUBLIC_DATA_ENDPOINTS_WILAYAH:-/json/wilayah.json}
+      - NUXT_PUBLIC_DATA_ENDPOINTS_CCTV=${NUXT_PUBLIC_DATA_ENDPOINTS_CCTV:-/json/cctv.json}
+      - NUXT_PUBLIC_DATA_ENDPOINTS_PENGURUS=${NUXT_PUBLIC_DATA_ENDPOINTS_PENGURUS:-/json/pengurus.json}
       - CCTV_NVR_HOST=${CCTV_NVR_HOST:-192.168.1.14}
       - CCTV_NVR_PORT=${CCTV_NVR_PORT:-554}
       - CCTV_NVR_USER=${CCTV_NVR_USER:-admin}
       - CCTV_NVR_PASSWORD=${CCTV_NVR_PASSWORD:-}
       - CCTV_RTSP_PATTERN=${CCTV_RTSP_PATTERN:-/avstream/channel={channel}/stream={stream}.sdp}
+    # Optional: mount local public/json to update GeoJSON data without rebuilding
+    # volumes:
+    #   - ./public/json:/app/.output/public/json:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/peta/json/layers.json"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     # If the NVR is only accessible on the host's direct network interface,
     # you can alternatively uncomment network_mode: host
     # network_mode: host
