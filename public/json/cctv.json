@@ -1,0 +1,277 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D01",
+        "name": "Gapura Timuran",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3684249,
+          -7.8176351
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D02",
+        "name": "Gledekan 1",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3683359,
+          -7.8176289
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D03",
+        "name": "Gledekan 2",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3696762,
+          -7.817549
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D04",
+        "name": "Gledekan 3",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.36965,
+          -7.8176068
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D05",
+        "name": "BATIK GRINGSING",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3696281,
+          -7.8179261
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D06",
+        "name": "Gang Sate",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3693947,
+          -7.8182546
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D07",
+        "name": "Sumodipuran",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3690124,
+          -7.8186043
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D08",
+        "name": "Gang Badak",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3686957,
+          -7.8181951
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D09",
+        "name": "Balai RK",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3696313,
+          -7.8169069
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D10",
+        "name": "Gang Catur 2",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3690268,
+          -7.8169872
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D11",
+        "name": "Gang Warno 1",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.369076,
+          -7.8167319
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D12",
+        "name": "Gang Warno 2",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3685728,
+          -7.8167396
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D13",
+        "name": "Gledekan 4",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3703175,
+          -7.8163953
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D14",
+        "name": "Gledekan 5",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3703175,
+          -7.8164065
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D15",
+        "name": "Pos Ronda RW 03",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3697517,
+          -7.8171578
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D16",
+        "name": "Gang Catur 1",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.368979,
+          -7.8176002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "D17",
+        "name": "Pos Gemati",
+        "type": "cctv",
+        "desc": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3694136,
+          -7.8176828
+        ]
+      }
+    }
+  ]
+}

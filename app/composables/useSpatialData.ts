@@ -61,16 +61,23 @@ export interface SpatialDataResponse {
 
 export const useRw3SpatialData = () => {
   const config = useRuntimeConfig()
+  const requestFetch = useRequestFetch()
+  const baseURL = config.app?.baseURL || '/'
   const endpoints = (config.public?.dataEndpoints as Record<string, string>) || {
-    layers: '/layers.json',
-    wilayah: 'https://s3.strbagus.com/rw3-timuran/wilayah.json',
-    cctv: 'https://s3.strbagus.com/rw3-timuran/cctv.json',
-    pengurus: 'https://s3.strbagus.com/rw3-timuran/pengurus.json'
+    layers: '/json/layers.json',
+    wilayah: '/json/wilayah.json',
+    cctv: '/json/cctv.json',
+    pengurus: '/json/pengurus.json'
+  }
+
+  const fetchEndpoint = <T>(url: string) => {
+    const isExternal = /^https?:///.test(url)
+    return requestFetch<T>(url, isExternal ? undefined : { baseURL })
   }
 
   return useAsyncData<SpatialDataResponse>('rw3-spatial-data', async () => {
     // 1. Fetch layer category visibility settings from JSON
-    const layers = await $fetch<LayerSettings>(endpoints.layers || '/layers.json').catch(() => ({
+    const layers = await fetchEndpoint<LayerSettings>(endpoints.layers || '/json/layers.json').catch(() => ({
       wilayah: true,
       cctv: true,
       pengurus: true
@@ -85,13 +92,13 @@ export const useRw3SpatialData = () => {
     // 2. Fetch GeoJSON datasets conditionally only for enabled layers
     const [wilayah, cctv, pengurus] = await Promise.all([
       layerFlags.wilayah
-        ? $fetch<GeoJsonFeatureCollection<WilayahProperties>>(endpoints.wilayah).catch(() => ({ type: 'FeatureCollection' as const, features: [] }))
+        ? fetchEndpoint<GeoJsonFeatureCollection<WilayahProperties>>(endpoints.wilayah || '/json/wilayah.json').catch(() => ({ type: 'FeatureCollection' as const, features: [] }))
         : Promise.resolve({ type: 'FeatureCollection' as const, features: [] }),
       layerFlags.cctv
-        ? $fetch<GeoJsonFeatureCollection<CctvProperties>>(endpoints.cctv).catch(() => ({ type: 'FeatureCollection' as const, features: [] }))
+        ? fetchEndpoint<GeoJsonFeatureCollection<CctvProperties>>(endpoints.cctv || '/json/cctv.json').catch(() => ({ type: 'FeatureCollection' as const, features: [] }))
         : Promise.resolve({ type: 'FeatureCollection' as const, features: [] }),
       layerFlags.pengurus
-        ? $fetch<GeoJsonFeatureCollection<PengurusProperties>>(endpoints.pengurus).catch(() => ({ type: 'FeatureCollection' as const, features: [] }))
+        ? fetchEndpoint<GeoJsonFeatureCollection<PengurusProperties>>(endpoints.pengurus || '/json/pengurus.json').catch(() => ({ type: 'FeatureCollection' as const, features: [] }))
         : Promise.resolve({ type: 'FeatureCollection' as const, features: [] })
     ])
 

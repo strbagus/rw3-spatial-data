@@ -16,10 +16,10 @@ export default defineNuxtConfig({
     },
     public: {
       dataEndpoints: {
-        layers: 'https://s3.strbagus.com/rw3-timuran/layers.json',
-        wilayah: 'https://s3.strbagus.com/rw3-timuran/wilayah.json',
-        cctv: 'https://s3.strbagus.com/rw3-timuran/cctv.json',
-        pengurus: 'https://s3.strbagus.com/rw3-timuran/pengurus.json'
+        layers: '/json/layers.json',
+        wilayah: '/json/wilayah.json',
+        cctv: '/json/cctv.json',
+        pengurus: '/json/pengurus.json'
       }
     }
   },
